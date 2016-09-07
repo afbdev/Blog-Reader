@@ -38,6 +38,28 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
                         // Interested in 'items'.  Attempt to create variable
                         if let items = (jsonResult as! NSDictionary)["items"] as? NSArray {
                             
+                            let context = self.fetchedResultsController.managedObjectContext
+                            
+                            // Delete everything in database so that it will refresh with new data each time
+                            let request = NSFetchRequest<Event>(entityName: "Event")
+                            do {
+                                let results = try context.fetch(request)
+                                if results.count > 0 {
+                                    for result in results {
+                                        context.delete(result)
+                                        
+                                        do {
+                                            try context.save()
+                                        } catch {
+                                            print("Specific delete failed")
+                                        }
+                                    }
+                                }
+                                
+                            } catch {
+                                print("Delete Failed")
+                            }
+                            
                             for item in items {
                                 if let item = item as? NSDictionary {
                                     print(item["published"])
@@ -45,7 +67,7 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
                                     print(item["content"])
                                     
                                     
-                                    let context = self.fetchedResultsController.managedObjectContext
+                                    // let context = self.fetchedResultsController.managedObjectContext
                                     let newEvent = Event(context: context)
                                     
                                     // If appropriate, configure the new managed object.
@@ -66,6 +88,9 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
                                     
                                 }
                             }
+                            // Update table
+                            self.tableView.reloadData()
+                            
                         }
                         
                     } catch {
@@ -147,7 +172,7 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
 
 
     func configureCell(_ cell: UITableViewCell, withEvent event: Event) {
-        cell.textLabel!.text = event.timestamp!.description
+        cell.textLabel!.text = event.value(forKey: "title") as? String
     }
 
     // MARK: - Fetched results controller
@@ -163,7 +188,7 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
         fetchRequest.fetchBatchSize = 20
         
         // Edit the sort key as appropriate.
-        let sortDescriptor = NSSortDescriptor(key: "timestamp", ascending: false)
+        let sortDescriptor = NSSortDescriptor(key: "published", ascending: false)
         
         fetchRequest.sortDescriptors = [sortDescriptor]
         
