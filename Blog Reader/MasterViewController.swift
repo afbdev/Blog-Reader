@@ -18,7 +18,7 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let url = URL(string: "https://www.googleapis.com/blogger/v3/blogs/10861780/posts?key=AIzaSyCIYuw3Ldn2Nyu9z9ejgjCtPpdUrlH8_EY")!
+        let url = URL(string: "https://www.googleapis.com/blogger/v3/blogs/10861780/posts?\(/*insert keyhere)*/)")!
         
         let task = URLSession.shared.dataTask(with: url) {
             (data, response, error) in
